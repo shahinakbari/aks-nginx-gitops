@@ -1,0 +1,35 @@
+name: Deploy Nginx to AKS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'manifests/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set AKS context
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: aks-rg
+        cluster-name: dev-aks
+
+    - name: Deploy Nginx to AKS
+      run: |
+        kubectl apply -f manifests/nginx-deployment.yaml
+
+    - name: Check Services
+      run: |
+        kubectl get svc
